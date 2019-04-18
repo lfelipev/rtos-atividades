@@ -1,7 +1,8 @@
 # LEDC
 
 Arquivo principal: ledc_example_main.c
-Para rodar:
+
+## Para rodar:
 
 make menuconfig
 make -j4 flash monitor
