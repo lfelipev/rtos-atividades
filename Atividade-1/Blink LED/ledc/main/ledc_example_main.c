@@ -51,8 +51,8 @@
 #define LEDC_TEST_DUTY         (4000)
 #define LEDC_TEST_FADE_TIME    (3000)
 
-#define GPIO_OUTPUT_IO_0    2
-#define GPIO_OUTPUT_IO_1    19
+#define GPIO_OUTPUT_IO_0    18
+#define GPIO_OUTPUT_IO_1    21
 #define GPIO_OUTPUT_PIN_SEL  ((1ULL<<GPIO_OUTPUT_IO_0) | (1ULL<<GPIO_OUTPUT_IO_1))
 #define GPIO_INPUT_IO_0     4
 #define GPIO_INPUT_IO_1     5
@@ -101,7 +101,15 @@ void app_main()
             .gpio_num   = LEDC_HS_CH0_GPIO,
             .speed_mode = LEDC_HS_MODE,
             .timer_sel  = LEDC_HS_TIMER
-        }
+        },
+        {
+            .channel    = LEDC_HS_CH1_CHANNEL,
+            .duty       = 0,
+            .gpio_num   = LEDC_HS_CH1_GPIO,
+            .speed_mode = LEDC_HS_MODE,
+            .timer_sel  = LEDC_HS_TIMER
+        },
+
     };
 
     // Set LED Controller with previously prepared configuration
@@ -119,26 +127,23 @@ void app_main()
         if(gpio_get_level(GPIO_INPUT_IO_1) == 0) {
             printf("LED ON\n");
             //gpio_set_level(GPIO_OUTPUT_IO_0, 1);
-            ledc_set_duty(ledc_channel[0].speed_mode, ledc_channel[0].channel, LEDC_TEST_DUTY);
-            ledc_update_duty(ledc_channel[0].speed_mode, ledc_channel[0].channel);
+            //printf("LEVEL: %d\n", gpio_get_level(GPIO_OUTPUT_IO_0));
+            ledc_set_duty(ledc_channel[1].speed_mode, ledc_channel[1].channel, LEDC_TEST_DUTY);
+            ledc_update_duty(ledc_channel[1].speed_mode, ledc_channel[1].channel);
         }
         else {
-            ledc_set_duty(ledc_channel[0].speed_mode, ledc_channel[0].channel, 0);
-            ledc_update_duty(ledc_channel[0].speed_mode, ledc_channel[0].channel);
+            ledc_set_duty(ledc_channel[1].speed_mode, ledc_channel[1].channel, 0);
+            ledc_update_duty(ledc_channel[1].speed_mode, ledc_channel[1].channel);
         }
 
         printf("1. Power on LED set duty = %d without fade\n", LEDC_TEST_DUTY);
-        for (ch = 0; ch < LEDC_TEST_CH_NUM; ch++) {
-            ledc_set_duty(ledc_channel[ch].speed_mode, ledc_channel[ch].channel, LEDC_TEST_DUTY);
-            ledc_update_duty(ledc_channel[ch].speed_mode, ledc_channel[ch].channel);
-        }
+        ledc_set_duty(ledc_channel[0].speed_mode, ledc_channel[0].channel, LEDC_TEST_DUTY);
+        ledc_update_duty(ledc_channel[0].speed_mode, ledc_channel[0].channel);
         vTaskDelay(50 / portTICK_PERIOD_MS);
 
         printf("2. Power off LED set duty = 0 without fade\n");
-        for (ch = 0; ch < LEDC_TEST_CH_NUM; ch++) {
-            ledc_set_duty(ledc_channel[ch].speed_mode, ledc_channel[ch].channel, 0);
-            ledc_update_duty(ledc_channel[ch].speed_mode, ledc_channel[ch].channel);
-        }
+        ledc_set_duty(ledc_channel[0].speed_mode, ledc_channel[0].channel, 0);
+        ledc_update_duty(ledc_channel[0].speed_mode, ledc_channel[0].channel);
         vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
 }
