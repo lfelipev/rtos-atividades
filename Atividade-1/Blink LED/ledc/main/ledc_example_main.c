@@ -11,6 +11,10 @@
 #include "freertos/task.h"
 #include "driver/ledc.h"
 #include "esp_err.h"
+#include <string.h>
+#include <stdlib.h>
+#include "freertos/queue.h"
+#include "driver/gpio.h"
 
 /*
  * About this example
@@ -42,14 +46,18 @@
 
 #define LEDC_LS_TIMER          LEDC_TIMER_1
 #define LEDC_LS_MODE           LEDC_LOW_SPEED_MODE
-#define LEDC_LS_CH2_GPIO       (4)
-#define LEDC_LS_CH2_CHANNEL    LEDC_CHANNEL_2
-#define LEDC_LS_CH3_GPIO       (5)
-#define LEDC_LS_CH3_CHANNEL    LEDC_CHANNEL_3
 
 #define LEDC_TEST_CH_NUM       (4)
 #define LEDC_TEST_DUTY         (4000)
 #define LEDC_TEST_FADE_TIME    (3000)
+
+#define GPIO_OUTPUT_IO_0    2
+#define GPIO_OUTPUT_IO_1    19
+#define GPIO_OUTPUT_PIN_SEL  ((1ULL<<GPIO_OUTPUT_IO_0) | (1ULL<<GPIO_OUTPUT_IO_1))
+#define GPIO_INPUT_IO_0     4
+#define GPIO_INPUT_IO_1     5
+#define GPIO_INPUT_PIN_SEL  ((1ULL<<GPIO_INPUT_IO_0) | (1ULL<<GPIO_INPUT_IO_1))
+#define ESP_INTR_FLAG_DEFAULT 0
 
 void app_main()
 {
@@ -105,6 +113,20 @@ void app_main()
     ledc_fade_func_install(0);
 
     while (1) {
+
+        // 
+        vTaskDelay(15 /portTICK_PERIOD_MS);
+        if(gpio_get_level(GPIO_INPUT_IO_1) == 0) {
+            printf("LED ON\n");
+            //gpio_set_level(GPIO_OUTPUT_IO_0, 1);
+            ledc_set_duty(ledc_channel[0].speed_mode, ledc_channel[0].channel, LEDC_TEST_DUTY);
+            ledc_update_duty(ledc_channel[0].speed_mode, ledc_channel[0].channel);
+        }
+        else {
+            ledc_set_duty(ledc_channel[0].speed_mode, ledc_channel[0].channel, 0);
+            ledc_update_duty(ledc_channel[0].speed_mode, ledc_channel[0].channel);
+        }
+
         printf("1. Power on LED set duty = %d without fade\n", LEDC_TEST_DUTY);
         for (ch = 0; ch < LEDC_TEST_CH_NUM; ch++) {
             ledc_set_duty(ledc_channel[ch].speed_mode, ledc_channel[ch].channel, LEDC_TEST_DUTY);
